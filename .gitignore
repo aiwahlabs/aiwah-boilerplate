@@ -99,12 +99,12 @@ logs
 # Docker
 .dockerignore
 
-# Docker volumes and data
-volumes/
+# Docker volumes and data (but allow service-specific configs)
 data/
 
-# Supabase specific
-services/supabase/volumes/
+# Supabase specific - ignore data but keep init scripts
+services/supabase/volumes/db/data/
+services/supabase/volumes/storage/
 services/supabase/dev/
 
 # N8N specific
@@ -140,8 +140,7 @@ n8n-repo/
 *.key
 *.crt
 
-# Database dumps
-*.sql
+# Database dumps (but allow init scripts)
 *.dump
 
 # Compressed files
