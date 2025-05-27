@@ -1,16 +1,23 @@
-# Supabase volumes and data
-volumes/db/data/
-volumes/storage/
+# Supabase runtime volumes (ignore generated data, keep config)
 volumes/logs/
 volumes/config/
 
 # Development data
 dev/
 
-# Database dumps
-*.sql
+# Database runtime data (ignore generated data)
+volumes/db/data/
+volumes/storage/data/
+
+# Database dumps and backups (ignore user-generated dumps)
 *.dump
 *.backup
+*-backup.sql
+dump-*.sql
+
+# Keep initialization scripts - these should be tracked!
+# volumes/db/init/ should be tracked
+# volumes/db/*.sql should be tracked (these are schema files)
 
 # Logs
 *.log
