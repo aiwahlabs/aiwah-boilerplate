@@ -1,276 +1,304 @@
 # Aiwah Boilerplate
 
-A self-hosted, open-source infrastructure boilerplate for building internal business applications. Provides a complete backend stack with authentication, database, real-time capabilities, and workflow automation - all running as isolated, modular services.
+A self-hosted infrastructure boilerplate for building applications with authentication, database, and workflow automation. Built with Docker Compose using official Supabase self-hosting and N8N workflow engine.
 
-**Current State:** Production-ready infrastructure with clean service separation and API-based communication.
+**Current State:** Basic infrastructure setup with three independent services that need manual coordination.
 
 ## What You Get
 
-**🏗️ Modular Service Architecture:**
-1. **Official Supabase Stack** - Complete self-hosted Supabase with all services
-2. **Next.js Application** - TypeScript, Tailwind CSS, containerized frontend
+**🏗️ Three Independent Services:**
+1. **Supabase Stack** - Official self-hosted Supabase with all services (auth, database, storage, etc.)
+2. **Next.js Application** - TypeScript frontend with Supabase integration
 3. **N8N Workflow Engine** - Visual automation with dedicated PostgreSQL database
-4. **Master Deployment Script** - One command to rule them all
 
-**🚀 Production-Ready Features:**
-- Official Supabase self-hosting (latest stable)
-- JWT authentication with proper token management
-- Kong API gateway with security and routing
-- Isolated services communicating via APIs
-- Docker network isolation with shared communication layer
-- Environment configuration with secure credential management
-- One-script deployment and management
+**🔧 Current Setup:**
+- Each service has its own `docker-compose.yml`
+- Manual service management required
+- Basic environment configuration
+- Service-specific `.gitignore` files with proper patterns
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        AIWAH MODULAR ARCHITECTURE                           │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐        │
-│  │   Next.js UI    │    │   Supabase       │    │   N8N Workflow  │        │
-│  │   Port: 3000    │◄──►│   Studio         │    │   Engine        │        │
-│  │   (Isolated)    │    │   Port: 8000     │    │   Port: 5678    │        │
-│  └─────────────────┘    └──────────────────┘    └─────────────────┘        │
-│           │                       │                       │                │
-│           └───────────────────────┼───────────────────────┘                │
-│                                   │                                        │
-│                    ┌──────────────▼──────────────┐                         │
-│                    │     aiwah-network           │                         │
-│                    │   (Shared Communication)    │                         │
-│                    └─────────────────────────────┘                         │
-│                                   │                                        │
-│              ┌────────────────────▼────────────────────┐                   │
-│              │      Official Supabase Services         │                   │
-│              │  • Kong Gateway (API Router)            │                   │
-│              │  • PostgreSQL Database                  │                   │
-│              │  • Auth, REST, Realtime, Storage        │                   │
-│              │  • Studio, Meta, Functions, Analytics   │                   │
-│              └─────────────────────────────────────────┘                   │
-│                                   │                                        │
-│              ┌────────────────────▼────────────────────┐                   │
-│              │      N8N Dedicated Database             │                   │
-│              │      (Completely Isolated)              │                   │
-│              └─────────────────────────────────────────┘                   │
-└─────────────────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────┐
+│                    CURRENT ARCHITECTURE                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│  ┌─────────────────┐    ┌──────────────────┐    ┌─────────────┐ │
+│  │   Next.js UI    │    │   Supabase       │    │   N8N       │ │
+│  │   Port: 3000    │    │   Studio         │    │   Port: 5678│ │
+│  │                 │    │   Port: 8000     │    │             │ │
+│  │ Independent     │    │ Independent      │    │ Independent │ │
+│  │ Service         │    │ Service Stack    │    │ Service     │ │
+│  └─────────────────┘    └──────────────────┘    └─────────────┘ │
+│                                                                 │
+│  Each service runs independently with its own docker-compose    │
+│  Manual coordination required between services                  │
+└─────────────────────────────────────────────────────────────────┘
 ```
 
 ## Project Structure
 
 ```
 aiwah-boilerplate/
-├── deploy.sh                    # Master deployment script
-├── services/                    # Isolated service definitions
+├── services/                    # Independent service definitions
 │   ├── ui/                      # Next.js Frontend Service
 │   │   ├── docker-compose.yml   # UI service definition
 │   │   ├── Dockerfile           # Container build
 │   │   ├── src/                 # Source code
-│   │   └── package.json         # Dependencies
+│   │   ├── package.json         # Dependencies
+│   │   └── .gitignore           # UI-specific ignore patterns
 │   ├── n8n/                     # N8N Workflow Service
-│   │   └── docker-compose.yml   # N8N + dedicated PostgreSQL
+│   │   ├── docker-compose.yml   # N8N + dedicated PostgreSQL
+│   │   └── .gitignore           # N8N-specific ignore patterns
 │   └── supabase/                # Official Supabase Stack
 │       ├── docker-compose.yml   # All Supabase services
-│       └── volumes/             # Configuration & data
+│       ├── volumes/             # Configuration & data
+│       │   └── db/              # Database initialization scripts
+│       ├── .env                 # Supabase configuration
+│       ├── .gitignore           # Supabase-specific ignore patterns
+│       └── reset.sh             # Supabase reset utility
 ├── docs/                        # Documentation
+├── .gitignore                   # Project-level ignore patterns
 └── README.md                    # This file
 ```
 
 ## Quick Start
 
-1. **Clone and setup:**
+1. **Clone the repository:**
    ```bash
    git clone https://github.com/yourusername/aiwah-boilerplate.git
    cd aiwah-boilerplate
    ```
 
-2. **Start everything:**
+2. **Start Supabase (required first):**
    ```bash
-   ./deploy.sh start
+   cd services/supabase
+   docker-compose up -d
    ```
 
-3. **Access your services:**
+3. **Start N8N:**
+   ```bash
+   cd ../n8n
+   docker-compose up -d
+   ```
+
+4. **Start UI:**
+   ```bash
+   cd ../ui
+   docker-compose up -d
+   ```
+
+5. **Access your services:**
    - **UI Application**: http://localhost:3000
-   - **Supabase Studio**: http://localhost:8000 (admin/password)
-   - **N8N Workflows**: http://localhost:5678 (admin/password)
+   - **Supabase Studio**: http://localhost:8000
+   - **N8N Workflows**: http://localhost:5678
 
 ## Service Management
 
-The `deploy.sh` script provides complete service lifecycle management:
+Each service must be managed independently:
 
+**Supabase Service:**
 ```bash
-# Start all services
-./deploy.sh start
-
-# Start specific service
-./deploy.sh start supabase
-./deploy.sh start ui
-./deploy.sh start n8n
-
-# Check status
-./deploy.sh status
-
-# View logs
-./deploy.sh logs supabase
-./deploy.sh logs ui
-./deploy.sh logs n8n
-
-# Stop services
-./deploy.sh stop
-
-# Restart services
-./deploy.sh restart
-
-# Clean everything
-./deploy.sh clean
+cd services/supabase
+docker-compose up -d        # Start
+docker-compose down         # Stop
+docker-compose logs -f      # View logs
+docker-compose ps           # Check status
 ```
 
-## Service Isolation
+**N8N Service:**
+```bash
+cd services/n8n
+docker-compose up -d        # Start
+docker-compose down         # Stop
+docker-compose logs -f      # View logs
+```
 
-Each service runs in its own isolated environment:
-
-**UI Service (`services/ui/`):**
-- Next.js application with TypeScript and Tailwind
-- Builds its own Docker image
-- Connects to Supabase via HTTP APIs
-- Isolated internal network + shared communication network
-
-**Supabase Service (`services/supabase/`):**
-- Official Supabase self-hosting stack
-- All services: Kong, Auth, REST, Realtime, Storage, Studio, etc.
-- Internal network for Supabase services
-- Kong gateway exposed to shared network for API access
-
-**N8N Service (`services/n8n/`):**
-- N8N workflow engine + dedicated PostgreSQL
-- Completely isolated from user data
-- Can connect to Supabase via APIs
-- Own internal network + shared communication network
-
-## Development Workflow
-
-**Frontend Development:**
+**UI Service:**
 ```bash
 cd services/ui
-npm run dev  # Hot reloading development
+docker-compose up -d        # Start
+docker-compose down         # Stop
+docker-compose logs -f      # View logs
 ```
 
-**Database Design:**
-- Use Supabase Studio at http://localhost:8000
-- Design schemas, set up RLS policies
-- Manage users and authentication
-
-**Workflow Automation:**
-- Use N8N at http://localhost:5678
-- Create workflows that interact with Supabase APIs
-- Dedicated database for workflow data
-
-**Service Development:**
+**Reset Everything:**
 ```bash
-./deploy.sh logs ui        # Debug UI issues
-./deploy.sh restart supabase  # Restart after config changes
-./deploy.sh status         # Check all service health
+# Stop all services
+cd services/ui && docker-compose down -v
+cd ../n8n && docker-compose down -v
+cd ../supabase && docker-compose down -v
+
+# Clean up Docker
+docker system prune -f
+docker volume prune -f
 ```
+
+## Service Details
+
+### Supabase Service (`services/supabase/`)
+
+**What's Included:**
+- PostgreSQL database with all extensions
+- GoTrue authentication service
+- PostgREST API generator
+- Realtime WebSocket service
+- Storage service for files
+- Supabase Studio (admin interface)
+- Kong API gateway
+- Edge functions runtime
+- Analytics and logging
+
+**Configuration:**
+- Environment variables in `services/supabase/.env`
+- Database initialization scripts in `volumes/db/`
+- Proper `.gitignore` that tracks schema files but ignores runtime data
+
+### UI Service (`services/ui/`)
+
+**What's Included:**
+- Next.js 13+ with App Router
+- TypeScript configuration
+- Tailwind CSS for styling
+- Supabase client integration
+- Docker containerization
+
+**Development:**
+```bash
+cd services/ui
+npm install
+npm run dev  # Hot reloading development server
+```
+
+### N8N Service (`services/n8n/`)
+
+**What's Included:**
+- N8N workflow engine
+- Dedicated PostgreSQL database (separate from Supabase)
+- Basic authentication
+- Persistent workflow storage
+
+**Access:**
+- URL: http://localhost:5678
+- Default credentials: Set via environment variables
 
 ## Environment Configuration
 
-The deployment script automatically:
-1. Creates a shared Docker network (`aiwah-network`)
-2. Generates a master `.env` file if none exists
-3. Copies environment variables to each service
-4. Starts services in the correct order (Supabase → N8N → UI)
-
-**Manual Configuration:**
-Create `.env` in the root directory with:
+**Supabase Configuration (`services/supabase/.env`):**
 ```bash
-# Supabase Configuration
+# Database
 POSTGRES_PASSWORD=your-secure-password
-JWT_SECRET=your-jwt-secret
+
+# JWT
+JWT_SECRET=your-jwt-secret-key
 ANON_KEY=your-anon-key
 SERVICE_ROLE_KEY=your-service-role-key
 
-# Admin Credentials
+# Admin
 DASHBOARD_USERNAME=admin
 DASHBOARD_PASSWORD=your-admin-password
 
-# N8N Configuration
-N8N_USERNAME=admin
-N8N_PASSWORD=your-n8n-password
-N8N_DB_PASSWORD=your-n8n-db-password
-N8N_ENCRYPTION_KEY=your-encryption-key
-
 # URLs
-SUPABASE_URL=http://localhost:8000
 SITE_URL=http://localhost:3000
 ```
 
-## Security Features
+**N8N Configuration:**
+Set these in your environment or docker-compose:
+```bash
+N8N_USERNAME=admin
+N8N_PASSWORD=your-n8n-password
+N8N_DB_PASSWORD=your-db-password
+N8N_ENCRYPTION_KEY=your-encryption-key
+```
 
-**Network Isolation:**
-- Each service has its own internal Docker network
-- Services communicate via shared `aiwah-network`
-- No direct database access between services
+## Development Workflow
 
-**API-Based Communication:**
-- UI connects to Supabase via Kong gateway
-- N8N connects to Supabase via HTTP APIs
-- Clean separation of concerns
+**Database Design:**
+1. Access Supabase Studio at http://localhost:8000
+2. Design schemas and set up Row Level Security (RLS) policies
+3. Manage users and authentication settings
+4. Test APIs via the built-in API documentation
 
-**Official Supabase Security:**
-- Latest official Supabase images
-- Proper JWT token management
-- Row Level Security (RLS) policies
-- Kong gateway with security plugins
+**Frontend Development:**
+1. Modify files in `services/ui/src/`
+2. Use `npm run dev` for hot reloading
+3. Connect to Supabase using the official client libraries
+
+**Workflow Automation:**
+1. Access N8N at http://localhost:5678
+2. Create workflows that can interact with Supabase APIs
+3. Use HTTP Request nodes to call Supabase endpoints
+
+## Important Files Tracked in Git
+
+The project now properly tracks essential database initialization files:
+
+**Supabase Schema Files (tracked):**
+- `services/supabase/volumes/db/*.sql` - Database schema and configuration
+- `services/supabase/volumes/db/init/data.sql` - Initialization data
+
+**What's Ignored:**
+- `volumes/db/data/` - Runtime database data
+- `node_modules/` - Dependencies
+- `.env` files - Sensitive configuration
+- Log files and temporary data
+
+## Current Limitations
+
+**Manual Coordination Required:**
+- No automated service orchestration
+- Services must be started in correct order (Supabase first)
+- No shared network configuration
+- Environment variables must be managed per service
+
+**Missing Features:**
+- No master deployment script
+- No automated environment setup
+- No service health monitoring
+- No integrated logging
 
 ## Production Deployment
 
-The same architecture works for production:
+**VPS Setup:**
+1. Clone the repository on your server
+2. Configure environment variables for each service
+3. Start services manually in order
+4. Set up reverse proxy for public access (nginx/caddy)
+5. Configure SSL certificates
+6. Set up backups for database volumes
 
-1. **VPS Setup:**
-   ```bash
-   # On your VPS
-   git clone your-repo
-   cd aiwah-boilerplate
-   ./deploy.sh start
-   ```
-
-2. **Access Admin Interfaces:**
-   ```bash
-   # SSH tunnels for secure access
-   ssh -L 8000:localhost:8000 user@your-vps  # Supabase Studio
-   ssh -L 5678:localhost:5678 user@your-vps  # N8N
-   ```
-
-3. **Public Access:**
-   - Set up reverse proxy (nginx/caddy) for port 3000 (UI)
-   - Configure SSL certificates
-   - Update environment variables for production URLs
+**Security Considerations:**
+- Change all default passwords
+- Use strong JWT secrets
+- Configure proper firewall rules
+- Use SSH tunnels for admin interface access
+- Regular security updates
 
 ## Next Steps
 
-1. **Build Your Application:**
-   - Implement authentication in the UI
-   - Design your database schema in Supabase Studio
-   - Create business logic workflows in N8N
+**Immediate Improvements Needed:**
+1. Create master deployment script
+2. Implement shared network configuration
+3. Add automated environment setup
+4. Implement service health monitoring
+5. Add integrated logging solution
 
-2. **Customize Services:**
-   - Modify `services/ui/` for your frontend needs
-   - Add custom Supabase functions
-   - Create complex N8N workflows
+**Application Development:**
+1. Implement authentication in the UI
+2. Design your database schema in Supabase Studio
+3. Create business logic workflows in N8N
+4. Build your application features
 
-3. **Scale and Deploy:**
-   - Use the same structure for production
-   - Add monitoring and backups
-   - Implement CI/CD pipelines
+## Why This Setup?
 
-## Why This Architecture?
+**✅ Official Components:** Uses official Supabase self-hosting and N8N images  
+**✅ Service Isolation:** Each service is completely independent  
+**✅ Proper Git Patterns:** Essential files tracked, runtime data ignored  
+**✅ Development Ready:** Hot reloading and easy local development  
+**✅ Production Capable:** Same structure works for production deployment  
 
-**✅ Clean Separation:** Each service is isolated and can be developed/deployed independently  
-**✅ Official Components:** Uses official Supabase self-hosting, not custom implementations  
-**✅ API Communication:** Services talk via HTTP APIs, not direct database connections  
-**✅ Easy Management:** One script to start/stop/monitor everything  
-**✅ Production Ready:** Same structure works for development and production  
-**✅ Modular:** Add/remove services without affecting others  
+**⚠️ Current State:** Basic infrastructure that requires manual coordination but provides a solid foundation for building applications.
 
 ## License
 
