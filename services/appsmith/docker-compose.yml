@@ -1,0 +1,19 @@
+version: "3.8"
+
+services:
+  appsmith:
+    image: index.docker.io/appsmith/appsmith-ce
+    container_name: aiwah-appsmith
+    ports:
+      - "8080:80"
+      - "8443:443"
+    volumes:
+      - appsmith_stacks:/appsmith-stacks
+    restart: unless-stopped
+    environment:
+      # Basic configuration - can be customized via environment variables
+      - APPSMITH_ENCRYPTION_PASSWORD=${APPSMITH_ENCRYPTION_PASSWORD:-}
+      - APPSMITH_ENCRYPTION_SALT=${APPSMITH_ENCRYPTION_SALT:-}
+
+volumes:
+  appsmith_stacks: 
